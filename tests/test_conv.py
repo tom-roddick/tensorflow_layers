@@ -9,7 +9,7 @@ class TestSpatialMaxPooling(unittest.TestCase):
         inp = tf.reshape(rng,[1, 4, 4, 2])
 
         target = tf.constant([[[11., 12.], [15., 16.]], [[27., 28.], [31., 32.]]])
-        output, indices = conv.spatial_max_pooling(inp, 2, 2)
+        output, indices = conv.spatial_max_pooling_indices(inp, 2, 2)
 
         assert_op = tf.equal(output, target)
         print_inp = tf.Print(assert_op, [inp], message="Input: ", summarize=16)
@@ -34,7 +34,7 @@ class TestSpatialUnpooling(unittest.TestCase):
             [[0, 0],[0, 0],[0, 0], [0, 0]],
             [[0, 0], [27., 28.], [0, 0], [31., 32.]]])
 
-        pooled, indices = conv.spatial_max_pooling(inp, 2, 2)
+        pooled, indices = conv.spatial_max_pooling_indices(inp, 2, 2)
 
         output = conv.spatial_unpooling(pooled, indices, 2, 2)
 

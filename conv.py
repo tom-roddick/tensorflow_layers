@@ -32,9 +32,10 @@ def spatial_conv(inputs, noutput_chls, kW, kH, dW=1, dH=1,
     conv = tf.nn.conv2d(inputs, weights, [1, dH, dW, 1], padding = padding)
 
 
-def spatial_max_pooling(inputs, kW, kH, dW=None, dH=None, padding='SAME',
-    name=None):
-    """Performs max pooling by taking the largest value in every kH x kW region.
+def spatial_max_pooling_indices(inputs, kW, kH, dW=None, dH=None,
+    padding='SAME', name=None):
+    """Performs max pooling by taking the largest value in every kH x kW region,
+    and outputs max values and pooling indices as tensors.
 
     Args:
         inputs: 4-D tensor with dimensions [batch_size, height, width, chls].
@@ -82,6 +83,7 @@ def spatial_unpooling(inputs, indices, kW, kH, dW=None, dH=None, padding='SAME',
     # Compute output dimensions
     output_shape = (tf.shape(inputs) - [0, 1, 1, 0]) * [1, dH, dW, 1] + [0, kH, kW, 0]
     pnt = tf.Print(output_shape, [output_shape])
+
     # Flatten inputs and indices into 1D vectors
     inputs_flat = tf.reshape(inputs, [-1])
     indices_flat = tf.reshape(indices, [-1])
