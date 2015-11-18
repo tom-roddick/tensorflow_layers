@@ -80,15 +80,15 @@ def spatial_unpooling(inputs, indices, kW, kH, dW=None, dH=None, padding='SAME',
     if dH is None: dH = kH
 
     # Compute output dimensions
-    output_shape = inputs.get_shape().as_list()
-    output_shape[1] = output_shape[1] * dH + kH - 1
-    output_shape[2] = output_shape[2] * dW + kW - 1
-
+    output_shape = (tf.shape(inputs) - [0, 1, 1, 0]) * [1, dH, dW, 1] + [0, kH, kW, 0]
+    pnt = tf.Print(output_shape, [output_shape])
     # Flatten inputs and indices into 1D vectors
-    inputs_flat = tf.reshape(inputs,[-1])
+    inputs_flat = tf.reshape(inputs, [-1])
     indices_flat = tf.reshape(indices, [-1])
+    output_shape_flat = tf.to_int64(tf.reduce_prod(output_shape, keep_dims = True))
 
     # Populate output with values from inputs
-    output = tf.sparse_to_dense(indices_flat, output_shape, inputs_flat, 0)
+    output_flat = tf.sparse_to_dense(indices_flat, output_shape_flat, inputs_flat, 0)
+    output = tf.reshape(output_flat, output_shape)
 
     return output
