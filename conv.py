@@ -59,8 +59,8 @@ def spatial_max_pooling_indices(input, kW, kH, dW=None, dH=None,
         padding, name)
 
 
-def spatial_unpooling(input, indices, kW, kH, dW=None, dH=None, padding='SAME',
-    name=None):
+def spatial_unpooling(input, indices, kW, kH, dW=None, dH=None,
+    output_shape=None, name=None):
     """Reconstructs the input to a pooling operation using the saved pooling
     indices.
 
@@ -72,6 +72,8 @@ def spatial_unpooling(input, indices, kW, kH, dW=None, dH=None, padding='SAME',
         kH: Height of pooling filter
         dW: Horizontal stride (defaults to kW)
         dH: Vertical stride (defaults to kH)
+        output_shape: Desired output shape. If ommitted, the output shape is
+            inferred from the input dimensions and kernel size
         name: Name scope for the module
 
     Returns:
@@ -81,16 +83,19 @@ def spatial_unpooling(input, indices, kW, kH, dW=None, dH=None, padding='SAME',
     if dH is None: dH = kH
 
     # Compute output dimensions
-    output_shape = (tf.shape(input) - [0, 1, 1, 0]) * [1, dH, dW, 1] + [0, kH, kW, 0]
-    pnt = tf.Print(output_shape, [output_shape])
+    if output_shape is None:
+        output_shape = ((tf.shape(input) - [0, 1, 1, 0]) * [1, dH, dW, 1]
+            + [0, kH, kW, 0])
 
     # Flatten input and indices into 1D vectors
     input_flat = tf.reshape(input, [-1])
     indices_flat = tf.reshape(indices, [-1])
-    output_shape_flat = tf.to_int64(tf.reduce_prod(output_shape, keep_dims = True))
+    output_shape_flat = tf.to_int64(tf.reduce_prod(output_shape,
+        keep_dims = True))
 
     # Populate output with values from input
-    output_flat = tf.sparse_to_dense(indices_flat, output_shape_flat, input_flat, 0)
+    output_flat = tf.sparse_to_dense(indices_flat, output_shape_flat,
+        input_flat, 0)
     output = tf.reshape(output_flat, output_shape)
 
     return output
